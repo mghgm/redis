@@ -76,7 +76,6 @@ static inline int isShutdownInitiated(void);
 int isReadyToShutdown(void);
 int finishShutdown(void);
 const char *replstateToString(int replstate);
-
 /*============================ Utility functions ============================ */
 
 /* This macro tells if we are in the context of loading an AOF. */
@@ -3549,8 +3548,10 @@ void call(client *c, int flags) {
     monotime monotonic_start = 0;
     if (monotonicGetType() == MONOTONIC_CLOCK_HW)
         monotonic_start = getMonotonicUs();
-
+    ustime_t command = ustime();
     c->cmd->proc(c);
+    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:command %lld \n", ustime() - command);
+    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:command %lld \n", ustime() - command);
 
     /* Clear the CLIENT_REPROCESSING_COMMAND flag after the proc is executed. */
     if (reprocessing_command) c->flags &= ~CLIENT_REPROCESSING_COMMAND;
@@ -3645,6 +3646,7 @@ void call(client *c, int flags) {
      * We never propagate EXEC explicitly, it will be implicitly
      * propagated if needed (see propagatePendingCommands).
      * Also, module commands take care of themselves */
+    ustime_t propagate = ustime();
     if (flags & CMD_CALL_PROPAGATE &&
         (c->flags & CLIENT_PREVENT_PROP) != CLIENT_PREVENT_PROP &&
         c->cmd->proc != execCommand &&
@@ -3678,6 +3680,8 @@ void call(client *c, int flags) {
         if (propagate_flags != PROPAGATE_NONE)
             alsoPropagate(c->db->id,c->argv,c->argc,propagate_flags);
     }
+    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:propagate %lld \n", ustime() - propagate);
+    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:propagate %lld \n", ustime() - propagate);
 
     /* Restore the old replication flags, since call() can be executed
      * recursively. */

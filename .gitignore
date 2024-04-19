@@ -41,3 +41,14 @@ Makefile.dep
 .ccls-cache/*
 compile_commands.json
 redis.code-workspace
+
+experiment/perf.data
+experiment/perf.data.old
+experiment/perf.svg
+experiment/out.perf-folded
+experiment/setup_cluster.sh
+experiment/dump.rdb
+experiment/appendonlydir
+experiment/logs/*
+experiment/config/rd*/nodes.conf
+
