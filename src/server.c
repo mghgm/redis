@@ -3548,10 +3548,10 @@ void call(client *c, int flags) {
     monotime monotonic_start = 0;
     if (monotonicGetType() == MONOTONIC_CLOCK_HW)
         monotonic_start = getMonotonicUs();
-    ustime_t command = ustime();
+    clock_t command = clock();
     c->cmd->proc(c);
-    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:command %lld \n", ustime() - command);
-    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:command %lld \n", ustime() - command);
+    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:command %lf \n", (double)(clock() - command)/CLOCKS_PER_SEC);
+    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:command %lf \n", (double)(clock() - command)/CLOCKS_PER_SEC);
 
     /* Clear the CLIENT_REPROCESSING_COMMAND flag after the proc is executed. */
     if (reprocessing_command) c->flags &= ~CLIENT_REPROCESSING_COMMAND;
@@ -3646,7 +3646,7 @@ void call(client *c, int flags) {
      * We never propagate EXEC explicitly, it will be implicitly
      * propagated if needed (see propagatePendingCommands).
      * Also, module commands take care of themselves */
-    ustime_t propagate = ustime();
+    clock_t propagate = clock();
     if (flags & CMD_CALL_PROPAGATE &&
         (c->flags & CLIENT_PREVENT_PROP) != CLIENT_PREVENT_PROP &&
         c->cmd->proc != execCommand &&
@@ -3680,8 +3680,8 @@ void call(client *c, int flags) {
         if (propagate_flags != PROPAGATE_NONE)
             alsoPropagate(c->db->id,c->argv,c->argc,propagate_flags);
     }
-    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:propagate %lld \n", ustime() - propagate);
-    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:propagate %lld \n", ustime() - propagate);
+    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:propagate %lf \n", (double)(clock() - propagate)/CLOCKS_PER_SEC);
+    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:propagate %lf \n", (double)(clock() - propagate)/CLOCKS_PER_SEC);
 
     /* Restore the old replication flags, since call() can be executed
      * recursively. */
