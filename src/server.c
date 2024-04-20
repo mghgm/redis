@@ -3550,8 +3550,8 @@ void call(client *c, int flags) {
         monotonic_start = getMonotonicUs();
     clock_t command = clock();
     c->cmd->proc(c);
-    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:command %lf \n", (double)(clock() - command)/CLOCKS_PER_SEC);
-    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:command %lf \n", (double)(clock() - command)/CLOCKS_PER_SEC);
+    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:command id: %ld %lf \n", c->id, (double)(clock() - command)/CLOCKS_PER_SEC);
+    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:command id: %ld %lf \n", c->id, (double)(clock() - command)/CLOCKS_PER_SEC);
 
     /* Clear the CLIENT_REPROCESSING_COMMAND flag after the proc is executed. */
     if (reprocessing_command) c->flags &= ~CLIENT_REPROCESSING_COMMAND;
@@ -3680,8 +3680,8 @@ void call(client *c, int flags) {
         if (propagate_flags != PROPAGATE_NONE)
             alsoPropagate(c->db->id,c->argv,c->argc,propagate_flags);
     }
-    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:propagate %lf \n", (double)(clock() - propagate)/CLOCKS_PER_SEC);
-    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:propagate %lf \n", (double)(clock() - propagate)/CLOCKS_PER_SEC);
+    if (strcmp(c->cmd->declared_name, "set")) printf("LOG:set:propagate id: %ld %lf \n", c->id, (double)(clock() - propagate)/CLOCKS_PER_SEC);
+    if (strcmp(c->cmd->declared_name, "get")) printf("LOG:get:propagate id: %ld %lf \n", c->id, (double)(clock() - propagate)/CLOCKS_PER_SEC);
 
     /* Restore the old replication flags, since call() can be executed
      * recursively. */
